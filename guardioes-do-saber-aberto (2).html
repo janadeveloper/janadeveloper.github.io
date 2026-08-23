@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guardiões do Saber Aberto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B2027;
+    --bg-soft:#123138;
+    --bg-softer:#1B4A54;
+    --bg-card:#163A42;
+    --parchment:#F4ECD8;
+    --parchment-2:#EADFC3;
+    --ink:#241E12;
+    --ink-soft:#5B5240;
+    --brass:#C9A227;
+    --brass-light:#E8C55B;
+    --emerald:#2E9E77;
+    --emerald-light:#4FC79A;
+    --rust:#B0503A;
+    --mist:#9CC1C4;
+    --mist-dim:#5F868A;
+    --radius-sm:6px;
+    --radius-md:12px;
+    --shadow-deep: 0 20px 60px rgba(0,0,0,0.45);
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    min-height:100%;
+    background:
+      radial-gradient(ellipse 900px 600px at 50% -10%, rgba(196,162,39,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 100%, rgba(46,158,119,0.08), transparent 60%),
+      var(--bg);
+    color:var(--mist);
+    font-family:'Inter', sans-serif;
+  }
+
+  body{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 64px;
+  }
+
+  h1,h2,h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    margin:0;
+    color:var(--parchment);
+  }
+
+  button{
+    font-family:'Inter', sans-serif;
+    cursor:pointer;
+    border:none;
+    background:none;
+    color:inherit;
+  }
+
+  button:focus-visible,
+  [tabindex]:focus-visible,
+  a:focus-visible{
+    outline:3px solid var(--brass-light);
+    outline-offset:3px;
+  }
+
+  ::selection{ background:var(--brass); color:var(--ink); }
+
+  .wrap{
+    width:100%;
+    max-width:760px;
+  }
+
+  /* ---------- Cabeçalho / corrente de cadeados ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:28px;
+    flex-wrap:wrap;
+  }
+
+  .brandmark{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .brandmark .owl{ width:34px; height:34px; flex:none; }
+
+  .brandmark span{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:17px;
+    color:var(--parchment);
+    letter-spacing:0.01em;
+  }
+
+  .score-pill{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    font-weight:600;
+    color:var(--brass-light);
+    background:rgba(201,162,39,0.12);
+    border:1px solid rgba(201,162,39,0.35);
+    padding:6px 14px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+
+  .lock-chain{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:6px;
+    margin-bottom:32px;
+    padding:18px 14px;
+    background:var(--bg-soft);
+    border:1px solid rgba(159,193,196,0.12);
+    border-radius:var(--radius-md);
+  }
+
+  .lock-node{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    flex:1;
+    min-width:0;
+  }
+
+  /* Regras base do ícone de cadeado — valem em qualquer contexto (cabeçalho, cartão de conclusão). */
+  .lock-icon{ width:30px; height:30px; overflow:visible; }
+  .lock-icon .lock-body{ fill:rgba(159,193,196,0.06); stroke:currentColor; stroke-width:1.6; transition:fill .35s ease, stroke .35s ease; }
+  .lock-icon .lock-shackle{
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.6;
+    transform-origin:15px 11px;
+    transition:transform .5s cubic-bezier(.34,1.56,.64,1), stroke .35s ease;
+  }
+  .lock-icon .lock-keyhole{ fill:currentColor; }
+
+  .lock-node .lock-icon{ color:var(--mist-dim); transition:color .35s ease; }
+
+  .lock-node.current .lock-icon{ color:var(--brass-light); }
+  .lock-node.current .lock-icon .lock-body{ fill:rgba(201,162,39,0.16); }
+
+  .lock-node.unlocked .lock-icon{ color:var(--emerald-light); }
+  .lock-node.unlocked .lock-icon .lock-body{ fill:rgba(46,158,119,0.18); }
+  .lock-node.unlocked .lock-icon .lock-shackle{ transform:translateY(-5px) rotate(-28deg); }
+
+  .lock-node small{
+    font-size:10.5px;
+    text-align:center;
+    color:var(--mist-dim);
+    line-height:1.25;
+    max-width:64px;
+  }
+
+  .lock-node.current small{ color:var(--brass-light); font-weight:600; }
+  .lock-node.unlocked small{ color:var(--emerald-light); }
+
+  .lock-connector{
+    height:1px;
+    flex:0 0 14px;
+    background:rgba(159,193,196,0.18);
+    margin-top:15px;
+  }
+
+  @media (max-width:560px){
+    .lock-node small{ display:none; }
+    .lock-connector{ flex-basis:8px; }
+  }
+
+  /* ---------- Cartão principal (sala) ---------- */
+  .card{
+    background:var(--parchment);
+    background-image:
+      radial-gradient(rgba(36,30,18,0.035) 1px, transparent 1px);
+    background-size: 3px 3px;
+    border-radius:var(--radius-md);
+    padding:36px 34px;
+    box-shadow:var(--shadow-deep);
+    position:relative;
+    border:1px solid rgba(36,30,18,0.08);
+  }
+
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border:1px solid rgba(36,30,18,0.10);
+    border-radius:8px;
+    pointer-events:none;
+  }
+
+  @media (max-width:560px){
+    .card{ padding:26px 20px; }
+    .card::before{ inset:7px; }
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--emerald);
+    margin-bottom:8px;
+  }
+
+  .room-title{
+    font-size:26px;
+    color:var(--ink);
+    margin-bottom:18px;
+  }
+
+  .lede{
+    font-size:16px;
+    line-height:1.65;
+    color:var(--ink-soft);
+    margin-bottom:20px;
+  }
+
+  /* ---------- mascote + fala ---------- */
+  .aberta-row{
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+    margin-bottom:22px;
+  }
+
+  .aberta-row .owl{ width:56px; height:56px; flex:none; margin-top:2px; }
+
+  .speech{
+    background:var(--parchment-2);
+    border:1px solid rgba(36,30,18,0.10);
+    border-radius:var(--radius-sm);
+    padding:14px 16px;
+    font-size:15px;
+    line-height:1.6;
+    color:var(--ink);
+    position:relative;
+  }
+
+  .speech::before{
+    content:"";
+    position:absolute;
+    left:-8px;
+    top:16px;
+    width:14px;
+    height:14px;
+    background:var(--parchment-2);
+    border-left:1px solid rgba(36,30,18,0.10);
+    border-bottom:1px solid rgba(36,30,18,0.10);
+    transform:rotate(45deg);
+  }
+
+  .speech strong{ color:var(--ink); }
+
+  /* ---------- Bloco de conceito (lição antes do desafio) ---------- */
+  .lesson-card{
+    background:var(--parchment-2);
+    border:1px solid rgba(36,30,18,0.12);
+    border-radius:10px;
+    padding:20px 22px;
+    margin-bottom:22px;
+  }
+
+  .lesson-title{
+    font-size:18px;
+    color:var(--ink);
+    margin-bottom:10px;
+  }
+
+  .lesson-list{
+    list-style:none;
+    margin:0 0 4px;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:11px;
+  }
+
+  .lesson-list li{
+    position:relative;
+    padding-left:20px;
+    font-size:14.5px;
+    line-height:1.55;
+    color:var(--ink);
+  }
+
+  .lesson-list li::before{
+    content:"◆";
+    color:var(--brass);
+    position:absolute;
+    left:0;
+    top:5px;
+    font-size:10px;
+  }
+
+  .lesson-list li strong{ color:var(--ink); }
+
+  .legend-grid{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:4px;
+  }
+
+  .legend-item{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    background:#fff;
+    border:1px solid rgba(36,30,18,0.10);
+    border-radius:8px;
+    padding:11px 14px;
+  }
+
+  .legend-term{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:13px;
+    color:var(--emerald);
+    flex:0 0 118px;
+    padding-top:1px;
+  }
+
+  .legend-def{
+    font-size:14px;
+    color:var(--ink);
+    line-height:1.5;
+  }
+
+  @media (max-width:520px){
+    .legend-item{ flex-direction:column; gap:4px; }
+    .legend-term{ flex:none; }
+  }
+
+  /* ---------- Botões ---------- */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-size:15px;
+    font-weight:600;
+    padding:12px 24px;
+    border-radius:8px;
+    transition:transform .15s ease, background .2s ease, box-shadow .2s ease;
+  }
+
+  .btn-primary{
+    background:var(--emerald);
+    color:#0B231C;
+  }
+  .btn-primary:hover{ background:var(--emerald-light); }
+  .btn-primary:active{ transform:scale(0.97); }
+  .btn-primary:disabled{ background:#B7C9C0; color:#6d7a74; cursor:not-allowed; }
+  .btn-primary:disabled:hover{ background:#B7C9C0; }
+
+  .btn-brass{
+    background:var(--brass);
+    color:#241D06;
+  }
+  .btn-brass:hover{ background:var(--brass-light); }
+  .btn-brass:active{ transform:scale(0.97); }
+
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1.5px solid rgba(36,30,18,0.25);
+    padding:10px 20px;
+  }
+  .btn-ghost:hover{ border-color:var(--ink-soft); color:var(--ink); }
+
+  .btn-hint{
+    background:transparent;
+    color:var(--rust);
+    border:1.5px dashed rgba(176,80,58,0.5);
+    font-size:13px;
+    padding:8px 16px;
+  }
+  .btn-hint:hover{ border-color:var(--rust); background:rgba(176,80,58,0.06); }
+  .btn-hint:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .btn-row{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:22px;
+    align-items:center;
+  }
+
+  /* ---------- Menu inicial ---------- */
+  .menu-hero{
+    text-align:center;
+    padding:8px 0 4px;
+  }
+
+  .menu-hero .owl{ width:96px; height:96px; margin:0 auto 18px; }
+
+  .menu-hero h1{ font-size:32px; color:var(--ink); margin-bottom:10px; }
+
+  .menu-hero .sub{
+    font-size:16px;
+    color:var(--ink-soft);
+    max-width:480px;
+    margin:0 auto 26px;
+    line-height:1.6;
+  }
+
+  .name-field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-width:340px;
+    margin:0 auto 22px;
+    text-align:left;
+  }
+
+  .name-field label{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+
+  .name-field input{
+    font-family:'Inter', sans-serif;
+    font-size:15px;
+    padding:11px 14px;
+    border-radius:8px;
+    border:1.5px solid rgba(36,30,18,0.20);
+    background:#fff;
+    color:var(--ink);
+  }
+
+  .name-field input:focus-visible{
+    outline:3px solid var(--brass-light);
+    outline-offset:1px;
+    border-color:var(--brass);
+  }
+
+  .save-note{
+    font-size:13px;
+    color:var(--ink-soft);
+    background:var(--parchment-2);
+    border-radius:8px;
+    padding:10px 14px;
+    margin:0 auto 20px;
+    max-width:420px;
+  }
+
+  /* ---------- Quiz ---------- */
+  .q-progress{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+
+  .q-text{
+    font-size:17px;
+    color:var(--ink);
+    font-weight:600;
+    margin-bottom:16px;
+    line-height:1.5;
+  }
+
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .option{
+    text-align:left;
+    padding:13px 16px;
+    border-radius:8px;
+    border:1.5px solid rgba(36,30,18,0.18);
+    background:#fff;
+    font-size:15px;
+    color:var(--ink);
+    line-height:1.45;
+    display:flex;
+    gap:10px;
+    transition:border-color .15s ease, background .15s ease;
+  }
+
+  .option:hover:not(:disabled){ border-color:var(--brass); background:rgba(201,162,39,0.05); }
+
+  .option .letter{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    color:var(--mist-dim);
+    flex:none;
+  }
+
+  .option.selected{ border-color:var(--brass); background:rgba(201,162,39,0.08); }
+  .option.correct{ border-color:var(--emerald); background:rgba(46,158,119,0.12); }
+  .option.incorrect{ border-color:var(--rust); background:rgba(176,80,58,0.10); }
+  .option:disabled{ cursor:default; }
+
+  .feedback-box{
+    margin-top:16px;
+    padding:14px 16px;
+    border-radius:8px;
+    font-size:14.5px;
+    line-height:1.55;
+    display:none;
+  }
+
+  .feedback-box.show{ display:block; }
+  .feedback-box.ok{ background:rgba(46,158,119,0.10); border:1px solid rgba(46,158,119,0.35); color:#134534; }
+  .feedback-box.no{ background:rgba(176,80,58,0.08); border:1px solid rgba(176,80,58,0.30); color:#5c2718; }
+
+  .hint-box{
+    margin-top:12px;
+    padding:12px 14px;
+    border-radius:8px;
+    background:rgba(176,80,58,0.06);
+    border:1px dashed rgba(176,80,58,0.35);
+    font-size:14px;
+    color:#5c2718;
+    display:none;
+  }
+  .hint-box.show{ display:block; }
+
+  /* ---------- Caso (sala de dados) ---------- */
+  .post-card{
+    background:#fff;
+    border:1.5px solid rgba(36,30,18,0.15);
+    border-radius:10px;
+    padding:16px 18px;
+    margin-bottom:16px;
+  }
+
+  .post-meta{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+
+  .post-meta .who{ font-weight:700; color:var(--ink); }
+
+  .post-body{
+    font-size:15px;
+    line-height:1.55;
+    color:var(--ink);
+  }
+
+  .judge-buttons{
+    display:flex;
+    gap:12px;
+    margin-top:18px;
+    flex-wrap:wrap;
+  }
+
+  .judge-btn{
+    flex:1;
+    min-width:160px;
+    padding:14px;
+    border-radius:8px;
+    font-weight:600;
+    font-size:15px;
+    border:1.5px solid rgba(36,30,18,0.20);
+    background:#fff;
+    color:var(--ink);
+  }
+
+  .judge-btn.ok-choice:hover:not(:disabled),
+  .judge-btn.no-choice:hover:not(:disabled){ border-color:var(--brass); background:rgba(201,162,39,0.06); }
+  .judge-btn:disabled{ cursor:default; opacity:0.55; }
+  .judge-btn.chosen.right{ border-color:var(--emerald); background:rgba(46,158,119,0.14); }
+  .judge-btn.chosen.wrong{ border-color:var(--rust); background:rgba(176,80,58,0.12); }
+
+  /* ---------- Associação (match) ---------- */
+  .match-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+    margin-top:6px;
+  }
+
+  @media (max-width:560px){
+    .match-grid{ grid-template-columns:1fr; }
+  }
+
+  .match-col h3{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+  }
+
+  .term-chip{
+    display:block;
+    width:100%;
+    text-align:left;
+    padding:12px 14px;
+    margin-bottom:9px;
+    border-radius:8px;
+    border:1.5px solid rgba(36,30,18,0.20);
+    background:#fff;
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink);
+  }
+
+  .term-chip:hover:not(:disabled){ border-color:var(--brass); }
+  .term-chip.selected{ border-color:var(--brass); background:rgba(201,162,39,0.12); box-shadow:0 0 0 2px rgba(201,162,39,0.25) inset; }
+  .term-chip.assigned{ opacity:0.5; }
+  .term-chip.assigned::after{ content:" ✓"; color:var(--emerald); }
+
+  .slot{
+    display:flex;
+    align-items:center;
+    width:100%;
+    min-height:52px;
+    text-align:left;
+    padding:10px 14px;
+    margin-bottom:9px;
+    border-radius:8px;
+    border:1.5px dashed rgba(36,30,18,0.28);
+    background:rgba(36,30,18,0.02);
+    font-size:14px;
+    color:var(--ink-soft);
+    line-height:1.4;
+  }
+
+  .slot.filled{
+    border-style:solid;
+    border-color:rgba(36,30,18,0.20);
+    background:#fff;
+    color:var(--ink);
+  }
+
+  .slot .fill-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    color:var(--brass);
+    margin-right:8px;
+    flex:none;
+  }
+
+  .slot.right{ border-color:var(--emerald); background:rgba(46,158,119,0.10); }
+  .slot.right .fill-tag{ color:var(--emerald); }
+  .slot.wrong{ border-color:var(--rust); background:rgba(176,80,58,0.10); }
+  .slot.wrong .fill-tag{ color:var(--rust); }
+
+  .match-hint-note{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+    background:var(--parchment-2);
+    padding:10px 14px;
+    border-radius:8px;
+  }
+
+  /* ---------- Sala concluída (overlay simples) ---------- */
+  .complete-badge{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:var(--parchment-2);
+    border-radius:10px;
+    padding:16px 18px;
+    margin:18px 0;
+  }
+
+  .complete-badge .lock-icon{ width:40px; height:40px; color:var(--emerald); flex:none; }
+  .complete-badge .lock-icon .lock-body{ fill:rgba(46,158,119,0.15); }
+  .complete-badge .lock-icon .lock-shackle{ transform:translateY(-5px) rotate(-28deg); }
+
+  .complete-badge .txt strong{ display:block; color:var(--ink); font-size:16px; margin-bottom:2px; }
+  .complete-badge .txt span{ font-size:13.5px; color:var(--ink-soft); }
+
+  /* ---------- Resultado final ---------- */
+  .vault{
+    text-align:center;
+    padding:6px 0 4px;
+  }
+
+  .vault .owl{ width:88px; height:88px; margin:0 auto 16px; }
+
+  .vault h1{ font-size:28px; color:var(--ink); margin-bottom:8px; }
+
+  .final-score{
+    font-family:'JetBrains Mono', monospace;
+    font-size:44px;
+    font-weight:700;
+    color:var(--brass);
+    margin:14px 0 4px;
+  }
+
+  .final-score-label{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    margin-bottom:24px;
+  }
+
+  .room-scores{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:24px;
+    text-align:left;
+  }
+
+  .room-score-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:14px;
+  }
+
+  .room-score-row .rname{ flex:1; color:var(--ink); font-weight:600; }
+  .room-score-row .rbar{ flex:2; height:8px; border-radius:99px; background:rgba(36,30,18,0.10); overflow:hidden; }
+  .room-score-row .rbar > div{ height:100%; background:var(--emerald); }
+  .room-score-row .rval{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--ink-soft); width:38px; text-align:right; }
+
+  .badges{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-bottom:26px;
+  }
+
+  .badge-pill{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:13px;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:999px;
+    background:rgba(201,162,39,0.14);
+    border:1px solid rgba(201,162,39,0.4);
+    color:#6b5310;
+  }
+
+  .no-badges{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin-bottom:26px;
+  }
+
+  .reset-corner{
+    position:fixed;
+    top:14px;
+    right:16px;
+    font-size:12px;
+    color:var(--mist-dim);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    z-index:10;
+  }
+  .reset-corner button{
+    color:var(--mist-dim);
+    text-decoration:underline;
+    font-size:12px;
+  }
+  .reset-corner button:hover{ color:var(--parchment); }
+
+  .sr-only{
+    position:absolute;
+    width:1px;height:1px;
+    padding:0;margin:-1px;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    border:0;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reset-corner">
+  <span id="save-indicator"></span>
+  <button id="reset-btn" type="button">Reiniciar jogo</button>
+</div>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brandmark">
+      <svg class="owl" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="34" r="22" fill="#2E9E77"/>
+        <circle cx="24" cy="30" r="7" fill="#F4ECD8"/>
+        <circle cx="40" cy="30" r="7" fill="#F4ECD8"/>
+        <circle cx="24" cy="30" r="3" fill="#241E12"/>
+        <circle cx="40" cy="30" r="3" fill="#241E12"/>
+        <path d="M32 34 L28 40 L36 40 Z" fill="#C9A227"/>
+        <path d="M14 20 L22 26 L14 30 Z" fill="#2E9E77"/>
+        <path d="M50 20 L42 26 L50 30 Z" fill="#2E9E77"/>
+      </svg>
+      <span>Guardiões do Saber Aberto</span>
+    </div>
+    <div class="score-pill" id="score-pill">PONTOS · 0</div>
+  </div>
+
+  <nav class="lock-chain" id="lock-chain" aria-label="Progresso pelas salas"></nav>
+
+  <main class="card" id="app"></main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     CONTEÚDO DAS SALAS
+     (Em um repositório real, isto viveria em arquivos .json
+     separados, para que qualquer professor edite sem programar.)
+     ========================================================= */
+
+  var ROOMS = [
+    {
+      id:"texto",
+      short:"Texto",
+      title:"Sala do Texto",
+      icon:"📜",
+      type:"quiz",
+      intro:"Bem-vindo(a), Guardião(ã)! Esta é a <strong>Sala do Texto</strong>. O Trancador escondeu a primeira chave sob más práticas de cópia. Responda às três perguntas para provar que você sabe diferenciar plágio de reaproveitamento ético.",
+      lesson:{
+        title:"O que é plágio — e o que muda com uma licença aberta?",
+        paragraph:"Toda obra — texto, imagem, música, vídeo — nasce com \u201ctodos os direitos reservados\u201d. Isso significa que, por padrão, é preciso da permissão do autor para copiar, adaptar ou redistribuir aquele conteúdo. Um autor pode abrir mão de parte desses direitos usando uma <strong>licença aberta</strong>, como as licenças Creative Commons, dizendo de antemão o que os outros podem fazer com a obra.",
+        bullets:[
+          "<strong>Plágio</strong> é apresentar como seu um texto, ideia ou trabalho de outra pessoa, sem indicar de onde veio.",
+          "Estar disponível gratuitamente na internet <strong>não</strong> significa que o conteúdo é livre para copiar sem crédito.",
+          "Citar a fonte — autor, local/link e, se possível, a licença — é o hábito mais simples para evitar plágio.",
+          "As licenças <strong>Creative Commons</strong> combinam letras para indicar o que é permitido: BY (crédito), SA (compartilhar igual), NC (não comercial), ND (sem derivações) e CC0 (domínio público)."
+        ]
+      },
+      questions:[
+        {
+          q:"Você encontrou um parágrafo perfeito num blog para o seu trabalho escolar. Qual é a atitude mais correta?",
+          options:[
+            "Copiar e colar sem indicar a fonte, já que está na internet e é \u201cde todo mundo\u201d.",
+            "Reescrever com suas próprias palavras ou citar entre aspas, sempre indicando autor e fonte.",
+            "Trocar só algumas palavras para o professor não perceber.",
+            "Usar apenas se o site não tiver aviso de \u201ctodos os direitos reservados\u201d."
+          ],
+          correct:1,
+          explain:"Estar disponível na internet não significa ser livre para copiar sem crédito. A prática correta é citar a fonte ou reescrever a ideia com suas próprias palavras.",
+          hint:"Pense: o que muda entre \u201ccopiar sem avisar\u201d e \u201cusar dando crédito\u201d?"
+        },
+        {
+          q:"Um texto está publicado com licença CC BY. Isso significa que você pode:",
+          options:[
+            "Usar, adaptar e até vender versões dele, desde que credite o autor original.",
+            "Usar apenas para fins não comerciais.",
+            "Usar sem nunca poder modificar o conteúdo.",
+            "Usar somente se manter a mesma licença na sua versão."
+          ],
+          correct:0,
+          explain:"CC BY é a licença mais aberta entre as Creative Commons: permite qualquer uso, inclusive comercial, exigindo apenas a atribuição de crédito ao autor.",
+          hint:"BY vem de \u201cby\u201d (\u201cpor\u201d) — a única exigência é dizer quem criou."
+        },
+        {
+          q:"Qual situação caracteriza plágio?",
+          options:[
+            "Citar um autor entre aspas e informar a fonte.",
+            "Parafrasear uma ideia e indicar de onde ela veio.",
+            "Apresentar como próprio um texto ou ideia de outra pessoa, sem crédito algum.",
+            "Usar uma imagem de domínio público."
+          ],
+          correct:2,
+          explain:"Plágio é apresentar como seu algo que não é — mesmo pequenos trechos sem crédito configuram prática antiética e, em muitos contextos, ilegal.",
+          hint:"O ponto comum das opções erradas é que todas mencionam dar crédito."
+        }
+      ]
+    },
+    {
+      id:"imagem",
+      short:"Imagem",
+      title:"Sala da Imagem",
+      icon:"🖼️",
+      type:"match",
+      intro:"As imagens desta sala escondem quatro selos de licença. Toque em uma sigla e depois na definição correspondente para associá-las. Você pode reorganizar quantas vezes quiser antes de verificar.",
+      lesson:{
+        title:"As quatro licenças que você vai usar nesta sala",
+        paragraph:"As licenças Creative Commons combinam letras para indicar o que pode ou não ser feito com uma obra. Veja o significado de cada selo antes de associá-los às definições:",
+        legend:[
+          { term:"CC BY", def:"Uso livre, inclusive comercial e com adaptações — só é preciso creditar o autor." },
+          { term:"CC BY-SA", def:"Pode adaptar, mas a nova versão deve manter a mesma licença aberta." },
+          { term:"CC BY-NC", def:"Pode usar e adaptar, mas nunca para fins comerciais." },
+          { term:"CC0", def:"Domínio público — pode usar de qualquer forma, sem nem precisar creditar." }
+        ]
+      },
+      pairs:[
+        { term:"CC BY", def:"Pode usar, adaptar e até vender, desde que credite o autor." },
+        { term:"CC BY-SA", def:"Pode adaptar, mas a nova versão precisa manter a mesma licença." },
+        { term:"CC BY-NC", def:"Pode usar e adaptar, mas nunca para fins comerciais." },
+        { term:"CC0", def:"Domínio público: pode usar de qualquer jeito, sem precisar creditar." }
+      ]
+    },
+    {
+      id:"audio",
+      short:"Áudio/Vídeo",
+      title:"Sala de Áudio e Vídeo",
+      icon:"🎬",
+      type:"quiz",
+      intro:"Aqui o som é a chave. Trilhas e vídeos livres também têm regras de uso — vamos ver se você sabe segui-las.",
+      lesson:{
+        title:"Gratuito não é o mesmo que \u201csem regras\u201d",
+        paragraph:"Bancos de música e vídeo livres costumam exigir atribuição — ou seja, mesmo sendo gratuitos, pedem que você credite quem criou a obra. Uma boa atribuição de conteúdo reutilizado costuma reunir quatro informações:",
+        bullets:[
+          "<strong>Título</strong> da obra, quando houver;",
+          "<strong>Autor(a)</strong> que criou o conteúdo;",
+          "<strong>Fonte</strong>: o link ou banco de onde o material foi retirado;",
+          "<strong>Licença</strong> usada (por exemplo, CC BY);",
+          "\u201cGratuito para assistir\u201d é diferente de \u201clivre para reutilizar\u201d: mesmo vídeos gratuitos podem ter todos os direitos reservados para reedição."
+        ]
+      },
+      questions:[
+        {
+          q:"Você baixou uma trilha sonora gratuita, com licença de atribuição, para o vídeo do seu trabalho. O que fazer?",
+          options:[
+            "Nada, já que a música é gratuita.",
+            "Incluir o nome do autor e o link da fonte nos créditos finais do vídeo.",
+            "Trocar o nome do arquivo para não precisar creditar.",
+            "Creditar apenas se alguém perguntar."
+          ],
+          correct:1,
+          explain:"Gratuito não é o mesmo que \u201csem regras\u201d. Licenças com atribuição exigem que você credite o autor, mesmo em uso não comercial.",
+          hint:"Gratuito ≠ sem condições."
+        },
+        {
+          q:"Qual é uma boa prática ao usar um vídeo de terceiros com licença CC BY numa apresentação escolar?",
+          options:[
+            "Incluir, na tela final ou na descrição, título, autor, fonte e licença usada.",
+            "Não mencionar nada, pois é trabalho escolar sem fins lucrativos.",
+            "Apagar a marca d\u2019água do vídeo original.",
+            "Publicar como se fosse produção própria."
+          ],
+          correct:0,
+          explain:"A atribuição correta inclui título, autor, fonte/link e a licença — um pequeno hábito que evita problemas e valoriza quem criou o conteúdo original.",
+          hint:"Pense nos quatro dados básicos de uma citação: o quê, quem, onde e sob qual licença."
+        },
+        {
+          q:"\u201cTodos os direitos reservados, mas gratuito para assistir\u201d é comum em plataformas de vídeo. Isso significa que você pode:",
+          options:[
+            "Baixar e reeditar livremente.",
+            "Apenas assistir; reutilizar o conteúdo exige autorização do autor.",
+            "Cortar trechos e postar em outra conta.",
+            "Usar como REA sem restrições."
+          ],
+          correct:1,
+          explain:"Gratuito para assistir não é o mesmo que aberto para reutilizar. \u201cTodos os direitos reservados\u201d significa que qualquer outro uso depende de permissão do autor.",
+          hint:"Assistir de graça e ter permissão para reusar são coisas diferentes."
+        }
+      ]
+    },
+    {
+      id:"dados",
+      short:"Dados/Redes",
+      title:"Sala de Dados e Redes Sociais",
+      icon:"🔎",
+      type:"judge",
+      intro:"Nesta sala você é um(a) detetive de fontes. Para cada publicação, decida: é <strong>confiável</strong> ou <strong>suspeita</strong>? Observe autoria, data e a presença (ou ausência) de fontes.",
+      lesson:{
+        title:"Como reconhecer uma fonte confiável?",
+        paragraph:"Antes de acreditar ou compartilhar uma informação, vale parar por um instante e observar alguns sinais:",
+        bullets:[
+          "<strong>Autoria</strong>: dá para saber quem escreveu? É uma pessoa, veículo ou instituição identificável?",
+          "<strong>Data</strong>: a informação é recente ou pode estar desatualizada?",
+          "<strong>Fonte</strong>: existe um link, estudo ou dado original para conferir?",
+          "<strong>Tom do texto</strong>: uso excessivo de caixa alta, urgência e promessas \u201cmilagrosas\u201d são sinais de alerta;",
+          "<strong>Confirmação cruzada</strong>: outras fontes confiáveis dizem a mesma coisa?"
+        ]
+      },
+      cases:[
+        {
+          who:"@NoticiaBomba123",
+          meta:"perfil anônimo · publicado há 2 minutos · sem link de fonte",
+          body:"URGENTE!! Cientistas descobrem que tomar suco de limão cura QUALQUER doença! Compartilhe antes que apaguem essa informação!!!",
+          verdict:"suspeita",
+          explain:"Sinais de alerta: urgência exagerada, promessa milagrosa sem base científica, perfil anônimo e pedido insistente de compartilhamento. Vale checar em fontes oficiais de saúde antes de acreditar ou repassar."
+        },
+        {
+          who:"Instituto Nacional de Meteorologia",
+          meta:"perfil institucional verificado · link para o boletim oficial",
+          body:"Previsão para a semana: frente fria avança sobre a região sul a partir de quinta-feira, com queda de temperatura e chuvas isoladas. Consulte o boletim completo no link.",
+          verdict:"confiavel",
+          explain:"Fonte identificável, institucional, verificada, com link para o dado original e informação verificável — características de uma fonte confiável."
+        },
+        {
+          who:"Blog pessoal sem nome de autor",
+          meta:"publicado há 3 anos · nenhuma fonte citada para os números",
+          body:"Estudo mostra que 90% dos alunos aprendem melhor jogando. (Sem indicação de qual estudo, quem realizou ou onde foi publicado.)",
+          verdict:"suspeita",
+          explain:"Mesmo sem intenção de enganar, a ausência de autoria e de fonte para o dado dificulta verificar se a informação é precisa ou atual. Antes de citar, procure a fonte primária do número."
+        },
+        {
+          who:"Jornalista Marina Alves — portal de notícias estabelecido",
+          meta:"matéria assinada · publicada hoje · entrevista com especialista citada",
+          body:"Segundo a professora Ana Lima, da universidade local, o novo programa de leitura aumentou em 15% o desempenho dos alunos participantes, aponta relatório divulgado nesta semana.",
+          verdict:"confiavel",
+          explain:"Autoria clara, veículo estabelecido, data recente e fonte especializada citada — bons indícios de confiabilidade, mesmo assim vale sempre cruzar com outras fontes."
+        }
+      ]
+    },
+    {
+      id:"arquivo",
+      short:"Arquivo",
+      title:"Arquivo Aberto — Desafio Final",
+      icon:"🗝️",
+      type:"match",
+      intro:"Última etapa! Escolha a licença mais adequada para cada recurso que você deseja compartilhar. Associe cada situação à licença correspondente para montar seu mini-repositório de REA.",
+      lesson:{
+        title:"Recapitulando: qual licença combina com cada situação?",
+        paragraph:"Você já conheceu quatro licenças na Sala da Imagem. Aqui aparecem mais duas — confira o quadro completo antes de montar seu mini-repositório:",
+        legend:[
+          { term:"CC BY", def:"Uso livre, inclusive comercial e com adaptações — só é preciso creditar o autor." },
+          { term:"CC BY-SA", def:"Pode adaptar, mas a nova versão deve manter a mesma licença aberta." },
+          { term:"CC BY-NC", def:"Pode usar e adaptar, mas nunca para fins comerciais." },
+          { term:"CC BY-NC-ND", def:"Pode compartilhar, mas sem uso comercial e sem alterar a obra original." },
+          { term:"CC0", def:"Domínio público — pode usar de qualquer forma, sem nem precisar creditar." },
+          { term:"Todos os direitos reservados", def:"Nenhum uso é permitido sem autorização direta do autor — é o padrão de quem não escolhe uma licença aberta." }
+        ]
+      },
+      pairs:[
+        { term:"CC BY-NC-ND", def:"Um poema autoral que você quer compartilhar, mas não quer que ninguém ganhe dinheiro com ele nem o altere." },
+        { term:"CC0", def:"Uma foto sua de paisagem que você quer doar totalmente ao domínio público, sem exigir nem crédito." },
+        { term:"CC BY", def:"Um resumo de aula que você não se importa que outras pessoas vendam ou modifiquem, contanto que seu nome apareça." }
+      ],
+      extraTerms:["CC BY-SA", "Todos os direitos reservados", "CC BY-NC"]
+    }
+  ];
+
+  var HINT_PENALTY = 6;
+
+  function lockIconSvg(){
+    return '<svg class="lock-icon" viewBox="0 0 30 30" aria-hidden="true">' +
+      '<rect class="lock-body" x="6" y="13" width="18" height="14" rx="2.5"/>' +
+      '<path class="lock-shackle" d="M10 13 V9 a5 5 0 0 1 10 0 v4"/>' +
+      '<circle class="lock-keyhole" cx="15" cy="19" r="1.6"/>' +
+    '</svg>';
+  }
+
+  /* =========================================================
+     ESTADO E PERSISTÊNCIA
+     ========================================================= */
+
+  var SAVE_KEY = "guardioes-saber-aberto-v1";
+
+  function freshState(){
+    return {
+      name:"",
+      started:false,
+      currentIndex:-1,
+      completedIds:[],
+      scores:{},
+      finished:false
+    };
+  }
+
+  var state = loadState();
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(SAVE_KEY);
+      if(!raw) return freshState();
+      var parsed = JSON.parse(raw);
+      if(!parsed || typeof parsed !== "object") return freshState();
+      return Object.assign(freshState(), parsed);
+    }catch(e){
+      return freshState();
+    }
+  }
+
+  function saveState(){
+    try{
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+      flashSaveIndicator();
+    }catch(e){ /* localStorage indisponível: o jogo segue sem salvar */ }
+  }
+
+  var saveIndicatorTimeout = null;
+  function flashSaveIndicator(){
+    var el = document.getElementById("save-indicator");
+    el.textContent = "progresso salvo";
+    clearTimeout(saveIndicatorTimeout);
+    saveIndicatorTimeout = setTimeout(function(){ el.textContent = ""; }, 1400);
+  }
+
+  function resetGame(){
+    if(!confirm("Isso vai apagar seu progresso salvo e recomeçar o jogo do início. Confirmar?")) return;
+    state = freshState();
+    saveState();
+    render();
+  }
+
+  document.getElementById("reset-btn").addEventListener("click", resetGame);
+
+  /* =========================================================
+     PONTUAÇÃO
+     ========================================================= */
+
+  function overallScore(){
+    var ids = ROOMS.map(function(r){ return r.id; });
+    var vals = ids.filter(function(id){ return state.scores[id] != null; })
+                  .map(function(id){ return state.scores[id]; });
+    if(vals.length === 0) return 0;
+    var sum = vals.reduce(function(a,b){ return a+b; }, 0);
+    return Math.round(sum / vals.length);
+  }
+
+  function totalPoints(){
+    var ids = ROOMS.map(function(r){ return r.id; });
+    var vals = ids.filter(function(id){ return state.scores[id] != null; })
+                  .map(function(id){ return state.scores[id]; });
+    return vals.reduce(function(a,b){ return a + Math.round(b); }, 0);
+  }
+
+  function computeBadges(){
+    var badges = [];
+    var s = state.scores;
+    if(s.dados != null && s.dados >= 75){
+      badges.push({ label:"Detetive de Fontes", desc:"Foi muito preciso ao avaliar publicações suspeitas." });
+    }
+    if(s.imagem != null && s.arquivo != null && (s.imagem + s.arquivo)/2 >= 75){
+      badges.push({ label:"Mestre das Licenças", desc:"Domina as siglas Creative Commons na prática." });
+    }
+    if(state.completedIds.length === ROOMS.length && overallScore() >= 85){
+      badges.push({ label:"Curador(a) Open", desc:"Excelente desempenho geral — pronto(a) para publicar REA de verdade." });
+    }
+    return badges;
+  }
+
+  /* =========================================================
+     RENDER: CABEÇALHO / CORRENTE DE CADEADOS
+     ========================================================= */
+
+  function renderTop(){
+    document.getElementById("score-pill").textContent = "PONTOS · " + totalPoints();
+
+    var chain = document.getElementById("lock-chain");
+    chain.innerHTML = "";
+    if(!state.started){
+      chain.style.display = "none";
+      return;
+    }
+    chain.style.display = "flex";
+
+    ROOMS.forEach(function(room, i){
+      if(i > 0){
+        var conn = document.createElement("div");
+        conn.className = "lock-connector";
+        chain.appendChild(conn);
+      }
+      var node = document.createElement("div");
+      var isUnlocked = state.completedIds.indexOf(room.id) !== -1;
+      var isCurrent = i === state.currentIndex && !isUnlocked;
+      node.className = "lock-node" + (isUnlocked ? " unlocked" : "") + (isCurrent ? " current" : "");
+      node.innerHTML =
+        lockIconSvg() +
+        '<small>' + room.short + '</small>';
+      chain.appendChild(node);
+    });
+  }
+
+  /* =========================================================
+     RENDER: MENU INICIAL
+     ========================================================= */
+
+  function renderMenu(){
+    var hasSave = state.currentIndex > 0 || state.completedIds.length > 0;
+    var app = document.getElementById("app");
+    app.innerHTML =
+      '<div class="menu-hero">' +
+        '<svg class="owl" viewBox="0 0 64 64" aria-hidden="true">' +
+          '<circle cx="32" cy="34" r="22" fill="#2E9E77"/>' +
+          '<circle cx="24" cy="30" r="7" fill="#F4ECD8"/>' +
+          '<circle cx="40" cy="30" r="7" fill="#F4ECD8"/>' +
+          '<circle cx="24" cy="30" r="3" fill="#241E12"/>' +
+          '<circle cx="40" cy="30" r="3" fill="#241E12"/>' +
+          '<path d="M32 34 L28 40 L36 40 Z" fill="#C9A227"/>' +
+          '<path d="M14 20 L22 26 L14 30 Z" fill="#2E9E77"/>' +
+          '<path d="M50 20 L42 26 L50 30 Z" fill="#2E9E77"/>' +
+        '</svg>' +
+        '<h1>Guardiões do Saber Aberto</h1>' +
+        '<p class="sub">O Trancador fechou as salas da Biblioteca Digital com cadeados de direitos autorais mal compreendidos. Explore cinco salas, aprenda sobre licenças abertas e checagem de fontes, e reabra o conhecimento para todos.</p>' +
+      '</div>' +
+      '<div class="name-field">' +
+        '<label for="player-name">Como podemos te chamar? (opcional)</label>' +
+        '<input type="text" id="player-name" placeholder="Seu nome ou apelido" value="' + escapeAttr(state.name) + '" maxlength="40">' +
+      '</div>' +
+      (hasSave ? '<p class="save-note">Encontramos um progresso salvo neste navegador. Você pode continuar de onde parou ou recomeçar (botão \u201cReiniciar jogo\u201d no canto superior).</p>' : '') +
+      '<div class="btn-row" style="justify-content:center;">' +
+        '<button class="btn btn-primary" id="start-btn">' + (hasSave ? "Continuar jornada" : "Iniciar jornada") + '</button>' +
+      '</div>';
+
+    document.getElementById("start-btn").addEventListener("click", function(){
+      var nameInput = document.getElementById("player-name");
+      state.name = nameInput.value.trim();
+      state.started = true;
+      if(state.currentIndex < 0) state.currentIndex = 0;
+      saveState();
+      render();
+    });
+  }
+
+  function escapeAttr(str){
+    return String(str || "").replace(/"/g, "&quot;");
+  }
+  function escapeHtml(str){
+    return String(str || "")
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  /* =========================================================
+     RENDER: SALA — QUIZ
+     ========================================================= */
+
+  var runtime = {}; // estado volátil da sala atual (não persistido)
+
+  function renderQuizRoom(room){
+    runtime = {
+      qi:0,
+      correctCount:0,
+      hintsUsed:0,
+      answered:false
+    };
+    renderQuizQuestion(room);
+  }
+
+  function renderQuizQuestion(room){
+    var q = room.questions[runtime.qi];
+    var app = document.getElementById("app");
+    app.innerHTML =
+      '<div class="eyebrow">' + room.icon + ' ' + room.title + '</div>' +
+      (runtime.qi === 0 ? '<h2 class="room-title">' + room.title + '</h2>' : '') +
+      '<div class="q-progress">Pergunta ' + (runtime.qi+1) + ' de ' + room.questions.length + '</div>' +
+      '<div class="q-text">' + escapeHtml(q.q) + '</div>' +
+      '<div class="options" id="options"></div>' +
+      '<div class="feedback-box" id="feedback"></div>' +
+      '<div class="hint-box" id="hintbox"></div>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-hint" id="hint-btn" type="button">Pedir uma dica (-' + HINT_PENALTY + ' pts)</button>' +
+        '<button class="btn btn-primary" id="next-btn" type="button" disabled>' + (runtime.qi === room.questions.length-1 ? "Ver resultado da sala" : "Próxima pergunta") + '</button>' +
+      '</div>';
+
+    var optsEl = document.getElementById("options");
+    var letters = ["A","B","C","D","E"];
+    q.options.forEach(function(opt, idx){
+      var b = document.createElement("button");
+      b.className = "option";
+      b.type = "button";
+      b.innerHTML = '<span class="letter">' + letters[idx] + '</span><span>' + escapeHtml(opt) + '</span>';
+      b.addEventListener("click", function(){
+        if(runtime.answered) return;
+        runtime.answered = true;
+        var allBtns = optsEl.querySelectorAll(".option");
+        allBtns.forEach(function(btn, i){
+          btn.disabled = true;
+          if(i === q.correct) btn.classList.add("correct");
+          else if(i === idx) btn.classList.add("incorrect");
+        });
+        var fb = document.getElementById("feedback");
+        fb.classList.add("show");
+        if(idx === q.correct){
+          runtime.correctCount++;
+          fb.classList.add("ok");
+          fb.textContent = "Correto! " + q.explain;
+        }else{
+          fb.classList.add("no");
+          fb.textContent = "Não foi dessa vez. " + q.explain;
+        }
+        document.getElementById("next-btn").disabled = false;
+        document.getElementById("hint-btn").disabled = true;
+      });
+      optsEl.appendChild(b);
+    });
+
+    document.getElementById("hint-btn").addEventListener("click", function(){
+      if(runtime.answered) return;
+      runtime.hintsUsed++;
+      var hb = document.getElementById("hintbox");
+      hb.classList.add("show");
+      hb.textContent = "Dica: " + q.hint;
+      this.disabled = true;
+    });
+
+    document.getElementById("next-btn").addEventListener("click", function(){
+      if(runtime.qi < room.questions.length - 1){
+        runtime.qi++;
+        runtime.answered = false;
+        renderQuizQuestion(room);
+      }else{
+        finishRoomScoring(room, computeQuizScore(room));
+      }
+    });
+  }
+
+  function computeQuizScore(room){
+    var pct = (runtime.correctCount / room.questions.length) * 100;
+    pct = pct - (runtime.hintsUsed * HINT_PENALTY);
+    return Math.max(0, Math.round(pct));
+  }
+
+  /* =========================================================
+     RENDER: SALA — JUDGE (detetive de fontes)
+     ========================================================= */
+
+  function renderJudgeRoom(room){
+    runtime = { ci:0, correctCount:0, hintsUsed:0, answered:false };
+    renderJudgeCase(room);
+  }
+
+  function renderJudgeCase(room){
+    var c = room.cases[runtime.ci];
+    var app = document.getElementById("app");
+    app.innerHTML =
+      '<div class="eyebrow">' + room.icon + ' ' + room.title + '</div>' +
+      (runtime.ci === 0 ? '<h2 class="room-title">' + room.title + '</h2>' : '') +
+      '<div class="q-progress">Publicação ' + (runtime.ci+1) + ' de ' + room.cases.length + '</div>' +
+      '<div class="post-card">' +
+        '<div class="post-meta"><span class="who">' + escapeHtml(c.who) + '</span></div>' +
+        '<div class="post-meta">' + escapeHtml(c.meta) + '</div>' +
+        '<div class="post-body">' + escapeHtml(c.body) + '</div>' +
+      '</div>' +
+      '<div class="judge-buttons" id="judge-buttons">' +
+        '<button class="judge-btn ok-choice" data-v="confiavel" type="button">✅ Parece confiável</button>' +
+        '<button class="judge-btn no-choice" data-v="suspeita" type="button">🚩 Parece suspeita</button>' +
+      '</div>' +
+      '<div class="feedback-box" id="feedback"></div>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-primary" id="next-btn" type="button" disabled>' + (runtime.ci === room.cases.length-1 ? "Ver resultado da sala" : "Próxima publicação") + '</button>' +
+      '</div>';
+
+    var btns = document.querySelectorAll("#judge-buttons .judge-btn");
+    btns.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        if(runtime.answered) return;
+        runtime.answered = true;
+        var choice = btn.getAttribute("data-v");
+        btns.forEach(function(b){ b.disabled = true; });
+        var correct = choice === c.verdict;
+        btn.classList.add("chosen", correct ? "right" : "wrong");
+        if(!correct){
+          var correctBtn = document.querySelector('#judge-buttons [data-v="' + c.verdict + '"]');
+          if(correctBtn) correctBtn.classList.add("chosen","right");
+        }
+        var fb = document.getElementById("feedback");
+        fb.classList.add("show", correct ? "ok" : "no");
+        fb.textContent = (correct ? "Boa! " : "Quase — ") + c.explain;
+        if(correct) runtime.correctCount++;
+        document.getElementById("next-btn").disabled = false;
+      });
+    });
+
+    document.getElementById("next-btn").addEventListener("click", function(){
+      if(runtime.ci < room.cases.length - 1){
+        runtime.ci++;
+        runtime.answered = false;
+        renderJudgeCase(room);
+      }else{
+        var pct = Math.round((runtime.correctCount / room.cases.length) * 100);
+        finishRoomScoring(room, pct);
+      }
+    });
+  }
+
+  /* =========================================================
+     RENDER: SALA — MATCH (associação por clique)
+     ========================================================= */
+
+  function renderMatchRoom(room){
+    var allTerms = room.pairs.map(function(p){ return p.term; }).concat(room.extraTerms || []);
+    // embaralha termos e definições
+    var terms = shuffle(allTerms.slice());
+    var defs = shuffle(room.pairs.map(function(p,i){ return { id:i, text:p.def }; }));
+
+    runtime = {
+      terms: terms,
+      defs: defs,
+      assignments: {}, // defId -> term string
+      selectedTerm: null,
+      hintsUsed: 0,
+      checked: false
+    };
+
+    paintMatchRoom(room);
+  }
+
+  function paintMatchRoom(room){
+    var app = document.getElementById("app");
+    app.innerHTML =
+      '<div class="eyebrow">' + room.icon + ' ' + room.title + '</div>' +
+      '<h2 class="room-title">' + room.title + '</h2>' +
+      '<div class="match-hint-note">Toque numa sigla à esquerda e depois na definição correspondente à direita para associá-las. Toque numa sigla já associada para desfazer.</div>' +
+      '<div class="match-grid">' +
+        '<div class="match-col"><h3>Licenças</h3><div id="terms-col"></div></div>' +
+        '<div class="match-col"><h3>O que cada uma permite</h3><div id="defs-col"></div></div>' +
+      '</div>' +
+      '<div class="feedback-box" id="feedback"></div>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-hint" id="hint-btn" type="button">Revelar uma associação (-' + HINT_PENALTY + ' pts)</button>' +
+        '<button class="btn btn-primary" id="verify-btn" type="button">Verificar associações</button>' +
+        '<button class="btn btn-primary" id="continue-btn" type="button" style="display:none;">Continuar</button>' +
+      '</div>';
+
+    paintTerms(room);
+    paintDefs(room);
+
+    document.getElementById("hint-btn").addEventListener("click", function(){
+      var unresolved = room.pairs.filter(function(p, idx){ return runtime.assignments[idx] !== p.term; });
+      if(unresolved.length === 0) return;
+      var pick = unresolved[0];
+      var defIdx = room.pairs.indexOf(pick);
+      runtime.assignments[defIdx] = pick.term;
+      runtime.hintsUsed++;
+      runtime.checked = false;
+      paintTerms(room);
+      paintDefs(room);
+    });
+
+    document.getElementById("verify-btn").addEventListener("click", function(){
+      verifyMatch(room);
+    });
+  }
+
+  function paintTerms(room){
+    var col = document.getElementById("terms-col");
+    col.innerHTML = "";
+    var assignedTerms = Object.keys(runtime.assignments).map(function(k){ return runtime.assignments[k]; });
+    runtime.terms.forEach(function(term){
+      var isAssigned = assignedTerms.indexOf(term) !== -1;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "term-chip" + (isAssigned ? " assigned" : "") + (runtime.selectedTerm === term ? " selected" : "");
+      b.textContent = term;
+      b.addEventListener("click", function(){
+        if(isAssigned){
+          // desfaz associação
+          Object.keys(runtime.assignments).forEach(function(k){
+            if(runtime.assignments[k] === term) delete runtime.assignments[k];
+          });
+          runtime.selectedTerm = null;
+        }else{
+          runtime.selectedTerm = (runtime.selectedTerm === term) ? null : term;
+        }
+        runtime.checked = false;
+        paintTerms(room);
+        paintDefs(room);
+      });
+      col.appendChild(b);
+    });
+  }
+
+  function paintDefs(room){
+    var col = document.getElementById("defs-col");
+    col.innerHTML = "";
+    runtime.defs.forEach(function(def){
+      var assignedTerm = runtime.assignments[def.id];
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "slot" + (assignedTerm ? " filled" : "");
+      b.innerHTML = (assignedTerm ? '<span class="fill-tag">' + escapeHtml(assignedTerm) + '</span>' : '') +
+                    '<span>' + escapeHtml(def.text) + '</span>';
+      b.addEventListener("click", function(){
+        if(assignedTerm){
+          delete runtime.assignments[def.id];
+        }else if(runtime.selectedTerm){
+          Object.keys(runtime.assignments).forEach(function(k){
+            if(runtime.assignments[k] === runtime.selectedTerm) delete runtime.assignments[k];
+          });
+          runtime.assignments[def.id] = runtime.selectedTerm;
+          runtime.selectedTerm = null;
+        }
+        runtime.checked = false;
+        paintTerms(room);
+        paintDefs(room);
+      });
+      col.appendChild(b);
+    });
+  }
+
+  function verifyMatch(room){
+    var total = room.pairs.length;
+    var correctCount = 0;
+    room.pairs.forEach(function(p, idx){
+      var chosen = runtime.assignments[idx];
+      var slotEl = document.getElementById("defs-col").children[
+        runtime.defs.findIndex(function(d){ return d.id === idx; })
+      ];
+      if(!slotEl) return;
+      slotEl.classList.remove("right","wrong");
+      if(chosen === p.term){
+        correctCount++;
+        slotEl.classList.add("right");
+      }else if(chosen){
+        slotEl.classList.add("wrong");
+      }
+    });
+
+    var pct = Math.max(0, Math.round((correctCount/total)*100) - runtime.hintsUsed*HINT_PENALTY);
+    var fb = document.getElementById("feedback");
+    fb.classList.remove("ok","no");
+    fb.classList.add("show", correctCount === total ? "ok" : "no");
+    fb.textContent = correctCount === total
+      ? "Todas as associações corretas! Você pode continuar."
+      : correctCount + " de " + total + " corretas. Ajuste as associações destacadas em vermelho e verifique novamente, ou continue mesmo assim.";
+
+    runtime.lastScore = pct;
+    document.getElementById("continue-btn").style.display = "inline-flex";
+    document.getElementById("continue-btn").onclick = function(){
+      finishRoomScoring(room, pct);
+    };
+  }
+
+  function shuffle(arr){
+    for(var i=arr.length-1; i>0; i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var tmp = arr[i]; arr[i]=arr[j]; arr[j]=tmp;
+    }
+    return arr;
+  }
+
+  /* =========================================================
+     BLOCO COMUM: INTRO DA SALA COM MASCOTE
+     ========================================================= */
+
+  function roomIntroBlock(room){
+    return '<h2 class="room-title">' + room.title + '</h2>' +
+      '<div class="aberta-row">' +
+        owlSvg(56) +
+        '<div class="speech">' + room.intro + '</div>' +
+      '</div>';
+  }
+
+  function lessonLegendHtml(items){
+    return '<div class="legend-grid">' + items.map(function(it){
+      return '<div class="legend-item"><span class="legend-term">' + it.term + '</span><span class="legend-def">' + it.def + '</span></div>';
+    }).join('') + '</div>';
+  }
+
+  function renderLesson(room){
+    var app = document.getElementById("app");
+    var lesson = room.lesson;
+    app.innerHTML =
+      '<div class="eyebrow">' + room.icon + ' ' + room.title + '</div>' +
+      roomIntroBlock(room) +
+      '<div class="lesson-card">' +
+        '<h3 class="lesson-title">' + lesson.title + '</h3>' +
+        (lesson.paragraph ? '<p class="lede" style="margin-bottom:14px;">' + lesson.paragraph + '</p>' : '') +
+        (lesson.bullets ? '<ul class="lesson-list">' + lesson.bullets.map(function(b){ return '<li>' + b + '</li>'; }).join('') + '</ul>' : '') +
+        (lesson.legend ? lessonLegendHtml(lesson.legend) : '') +
+      '</div>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-primary" id="lesson-continue-btn" type="button">Entendi, ir para o desafio</button>' +
+      '</div>';
+
+    document.getElementById("lesson-continue-btn").addEventListener("click", function(){
+      if(room.type === "quiz") renderQuizRoom(room);
+      else if(room.type === "judge") renderJudgeRoom(room);
+      else if(room.type === "match") renderMatchRoom(room);
+      renderTop();
+    });
+  }
+
+  function owlSvg(size){
+    return '<svg class="owl" width="' + size + '" height="' + size + '" viewBox="0 0 64 64" aria-hidden="true">' +
+      '<circle cx="32" cy="34" r="22" fill="#2E9E77"/>' +
+      '<circle cx="24" cy="30" r="7" fill="#F4ECD8"/>' +
+      '<circle cx="40" cy="30" r="7" fill="#F4ECD8"/>' +
+      '<circle cx="24" cy="30" r="3" fill="#241E12"/>' +
+      '<circle cx="40" cy="30" r="3" fill="#241E12"/>' +
+      '<path d="M32 34 L28 40 L36 40 Z" fill="#C9A227"/>' +
+      '<path d="M14 20 L22 26 L14 30 Z" fill="#2E9E77"/>' +
+      '<path d="M50 20 L42 26 L50 30 Z" fill="#2E9E77"/>' +
+    '</svg>';
+  }
+
+  /* =========================================================
+     CONCLUSÃO DE SALA
+     ========================================================= */
+
+  function finishRoomScoring(room, pct){
+    state.scores[room.id] = pct;
+    if(state.completedIds.indexOf(room.id) === -1){
+      state.completedIds.push(room.id);
+    }
+    saveState();
+    renderRoomComplete(room, pct);
+  }
+
+  function renderRoomComplete(room, pct){
+    var app = document.getElementById("app");
+    var isLast = state.currentIndex === ROOMS.length - 1;
+    app.innerHTML =
+      '<div class="eyebrow">' + room.icon + ' ' + room.title + ' — concluída</div>' +
+      '<div class="complete-badge">' +
+        lockIconSvg() +
+        '<div class="txt"><strong>Chave conquistada!</strong><span>Pontuação da sala: ' + pct + ' de 100</span></div>' +
+      '</div>' +
+      '<p class="lede">' + roomFeedbackMessage(pct) + '</p>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-primary" id="advance-btn" type="button">' + (isLast ? "Ver arquivo final" : "Ir para a próxima sala") + '</button>' +
+      '</div>';
+
+    document.getElementById("advance-btn").addEventListener("click", function(){
+      if(isLast){
+        state.finished = true;
+        saveState();
+        render();
+      }else{
+        state.currentIndex++;
+        saveState();
+        render();
+      }
+    });
+
+    renderTop();
+  }
+
+  function roomFeedbackMessage(pct){
+    if(pct >= 90) return "Desempenho excelente — você domina bem esse tema.";
+    if(pct >= 70) return "Bom trabalho! Você entendeu o essencial, com pequenos deslizes.";
+    if(pct >= 40) return "Você avançou, mas vale revisar esse tema com calma depois do jogo.";
+    return "Esse tema ainda precisa de atenção — considere conversar com seu(sua) professor(a) sobre ele.";
+  }
+
+  /* =========================================================
+     RESULTADOS FINAIS
+     ========================================================= */
+
+  function renderResults(){
+    var overall = overallScore();
+    var badges = computeBadges();
+
+    var app = document.getElementById("app");
+    app.innerHTML =
+      '<div class="vault">' +
+        owlSvg(88) +
+        '<h1>Arquivo reaberto!</h1>' +
+        '<p class="lede" style="text-align:center;">' + (state.name ? escapeHtml(state.name) + ", você" : "Você") + ' percorreu toda a Biblioteca Digital e libertou o conhecimento do Trancador.</p>' +
+        '<div class="final-score">' + overall + '</div>' +
+        '<div class="final-score-label">pontuação geral (0–100)</div>' +
+      '</div>' +
+      '<div class="room-scores" id="room-scores"></div>' +
+      (badges.length
+        ? '<div class="badges" id="badges"></div>'
+        : '<p class="no-badges">Nenhuma medalha especial desta vez — jogue novamente para tentar conquistar uma!</p>') +
+      '<div class="btn-row" style="justify-content:center;">' +
+        '<button class="btn btn-brass" id="export-btn" type="button">Exportar relatório</button>' +
+        '<button class="btn btn-ghost" id="replay-btn" type="button">Jogar novamente</button>' +
+      '</div>';
+
+    var rs = document.getElementById("room-scores");
+    ROOMS.forEach(function(room){
+      var val = state.scores[room.id] != null ? state.scores[room.id] : 0;
+      var row = document.createElement("div");
+      row.className = "room-score-row";
+      row.innerHTML =
+        '<span class="rname">' + room.short + '</span>' +
+        '<span class="rbar"><div style="width:' + val + '%"></div></span>' +
+        '<span class="rval">' + val + '</span>';
+      rs.appendChild(row);
+    });
+
+    if(badges.length){
+      var bEl = document.getElementById("badges");
+      badges.forEach(function(b){
+        var pill = document.createElement("span");
+        pill.className = "badge-pill";
+        pill.title = b.desc;
+        pill.textContent = "🏅 " + b.label;
+        bEl.appendChild(pill);
+      });
+    }
+
+    document.getElementById("export-btn").addEventListener("click", function(){
+      exportReport(overall, badges);
+    });
+    document.getElementById("replay-btn").addEventListener("click", function(){
+      if(!confirm("Isso vai reiniciar o jogo do zero. Confirmar?")) return;
+      state = freshState();
+      saveState();
+      render();
+    });
+
+    document.getElementById("lock-chain").innerHTML = "";
+    ROOMS.forEach(function(room, i){
+      if(i > 0){
+        var conn = document.createElement("div");
+        conn.className = "lock-connector";
+        document.getElementById("lock-chain").appendChild(conn);
+      }
+      var node = document.createElement("div");
+      node.className = "lock-node unlocked";
+      node.innerHTML =
+        lockIconSvg() +
+        '<small>' + room.short + '</small>';
+      document.getElementById("lock-chain").appendChild(node);
+    });
+    document.getElementById("score-pill").textContent = "PONTOS · " + totalPoints();
+  }
+
+  function exportReport(overall, badges){
+    var report = {
+      jogo:"Guardiões do Saber Aberto",
+      jogador: state.name || "Guardião(ã) anônimo(a)",
+      data: new Date().toISOString(),
+      pontuacaoGeral: overall,
+      salas: ROOMS.map(function(room){
+        return { sala: room.title, id: room.id, pontuacao: state.scores[room.id] != null ? state.scores[room.id] : null };
+      }),
+      medalhas: badges.map(function(b){ return b.label; })
+    };
+    var blob = new Blob([JSON.stringify(report, null, 2)], { type:"application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var safeName = (state.name || "guardiao").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+    a.href = url;
+    a.download = "relatorio-guardioes-" + (safeName || "aluno") + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* =========================================================
+     ROTEADOR PRINCIPAL
+     ========================================================= */
+
+  function render(){
+    renderTop();
+
+    if(!state.started){
+      var chain = document.getElementById("lock-chain");
+      chain.style.display = "none";
+      renderMenu();
+      return;
+    }
+
+    if(state.finished){
+      renderResults();
+      return;
+    }
+
+    var room = ROOMS[state.currentIndex];
+    if(!room){
+      state.finished = true;
+      saveState();
+      renderResults();
+      return;
+    }
+
+    if(room.type === "quiz" || room.type === "judge" || room.type === "match"){
+      renderLesson(room);
+    }
+    renderTop();
+  }
+
+  render();
+})();
+</script>
+
+</body>
+</html>
